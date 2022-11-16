@@ -1,6 +1,6 @@
 AUTHOR = 'Ferdinando Simonetti'
 SITENAME = "Ferdinando Simonetti's personal pages"
-SITEURL = ''
+SITEURL = 'https://blog.fsmn.xyz'
 
 PATH = 'content'
 
@@ -18,12 +18,12 @@ AUTHOR_FEED_RSS = None
 # Blogroll
 LINKS = (('Pelican', 'https://getpelican.com/'),
          ('Python.org', 'https://www.python.org/'),
-         ('Jinja2', 'https://palletsprojects.com/p/jinja/'),
-         ('You can modify those links in your config file', '#'),)
+         ('Kubernetes', 'https://kubernetes.io/'),
+         ('vRealize Automation', 'https://docs.vmware.com/en/vRealize-Automation/index.html'),)
 
 # Social widget
-SOCIAL = (('Italian-focused Mastodon', 'https://mastodon.uno/@rimmon1971'),
-          ('Tech-focused Mastodon', 'https://fosstodon.org/@rimmon1971'),
+SOCIAL = (('Mastodon ITA', 'https://mastodon.uno/@rimmon1971'),
+          ('Mastodon Tech', 'https://fosstodon.org/@rimmon1971'),
           ('LinkedIN', 'https://www.linkedin.com/in/ferdinandosimonetti'),
           ('Github', 'https://github.com/ferdinandosimonetti'),)
 
