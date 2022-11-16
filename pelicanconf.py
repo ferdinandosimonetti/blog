@@ -22,8 +22,10 @@ LINKS = (('Pelican', 'https://getpelican.com/'),
          ('You can modify those links in your config file', '#'),)
 
 # Social widget
-SOCIAL = (('You can add links in your config file', '#'),
-          ('Another social link', '#'),)
+SOCIAL = (('Italian-focused Mastodon', 'https://mastodon.uno/@rimmon1971'),
+          ('Tech-focused Mastodon', 'https://fosstodon.org/@rimmon1971'),
+          ('LinkedIN', 'https://www.linkedin.com/in/ferdinandosimonetti'),
+          ('Github', 'https://github.com/ferdinandosimonetti'),)
 
 DEFAULT_PAGINATION = 10
 
