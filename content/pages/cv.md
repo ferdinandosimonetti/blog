@@ -1,4 +1,4 @@
-Title: Ferdinando Simonetti's Curriculum Vitae
+Title: Curriculum Vitae
 Author: Ferdinando Simonetti
 
 # IAAS ARCHITECT - LINUX ARCHITECT: requisite analysis, implementation and maintenance of IT infrastructures
