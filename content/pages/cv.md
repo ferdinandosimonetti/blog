@@ -16,7 +16,7 @@ Developed solutions for vSphere management and provisioning, Windows patch manag
 
 Current fields of operation: continuously delivered microservices, backed by containerization technology; IaaS deployments via VMware vRealize software.
 
-# PROFICIENCIES
+## PROFICIENCIES
 - Container orchestration: Docker Swarm, Kubernetes (K3S, Rancher/RKE, Azure AKS platforms)
 - Knowledge of Amazon Web Services, Google Cloud Platform, Azure Platform
 - IaaS Resource Management: good experience on VMware vRealize Automation/Orchestrator v7.x, actually working on vRA8.x 
