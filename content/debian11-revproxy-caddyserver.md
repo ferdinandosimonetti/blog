@@ -40,8 +40,27 @@ ferdi@fsmntest0:~ $ sudo caddy reverse-proxy \
 >  --from newsite.fsmn.xyz \
 >  --to https://blog.fsmn.xyz \
 >  --change-host-header
+2022/11/17 09:01:52.330 WARN    admin   admin endpoint disabled
+2022/11/17 09:01:52.330 INFO    http    server is listening only on the HTTPS port but has no TLS connection policies; adding one to enable TLS {"server_name": "proxy", "https_port": 443}
+2022/11/17 09:01:52.330 INFO    http    enabling automatic HTTP->HTTPS redirects        {"server_name": "proxy"}
+2022/11/17 09:01:52.330 INFO    tls.cache.maintenance   started background certificate maintenance      {"cache": "0xc000688bd0"}
+2022/11/17 09:01:52.330 INFO    http    enabling HTTP/3 listener        {"addr": ":443"}
+2022/11/17 09:01:52.330 INFO    tls     cleaning storage unit   {"description": "FileStorage:/root/.local/share/caddy"}
+2022/11/17 09:01:52.330 INFO    failed to sufficiently increase receive buffer size (was: 208 kiB, wanted: 2048 kiB, got: 416 kiB). See https://github.com/lucas-clemente/quic-go/wiki/UDP-Receive-Buffer-Size for details.
+2022/11/17 09:01:52.330 INFO    http.log        server running  {"name": "proxy", "protocols": ["h1", "h2", "h3"]}
+2022/11/17 09:01:52.330 INFO    http.log        server running  {"name": "remaining_auto_https_redirects", "protocols": ["h1", "h2", "h3"]}
+2022/11/17 09:01:52.330 INFO    http    enabling automatic TLS certificate management   {"domains": ["newsite.fsmn.xyz"]}
+2022/11/17 09:01:52.331 INFO    tls     finished cleaning storage units
+Caddy proxying https://newsite.fsmn.xyz -> blog.fsmn.xyz:443
 ```
-Et voilà! HTTPS certificate requested to Let's Encrypt by Caddy on the fly! 
+Et voilà! HTTPS certificate requested to Let's Encrypt by Caddy on the fly!
+But there's an INFO message suggesting some system/kernel tuning, namely this one
+```
+ferdi@fsmntest0:/etc/caddy$ sudo sysctl -w net.core.rmem_max=2500000
+net.core.rmem_max = 2500000
+``` 
+(of course you'll have to set it permanently).
+Subsequent **caddy** run with same parameters doesn't show this hint anymore.
 
 ### How to convert this command in a Caddyfile suitable to systemd daemon?
 
