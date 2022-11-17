@@ -31,7 +31,7 @@ You'll have to create a new *\*.conf* file under */etc/apache2/sites-available/*
 ```
 # revproxy.conf
 <VirtualHost *:80>
-        ServerName newname.fsmn.xyz
+        ServerName newsite.fsmn.xyz
         ServerAdmin webmaster@fsmn.xyz
         ErrorLog ${APACHE_LOG_DIR}/rp-error.log
         CustomLog ${APACHE_LOG_DIR}/rp-access.log combined
@@ -50,7 +50,7 @@ You'll have to create a new *\*.conf* file under */etc/apache2/sites-available/*
 
 <IfModule mod_ssl.c>
 <VirtualHost *:443>
-        ServerName newname.fsmn.xyz
+        ServerName newsite.fsmn.xyz
         ServerAdmin webmaster@fsmn.xyz
         ErrorLog ${APACHE_LOG_DIR}/rp-error.log
         CustomLog ${APACHE_LOG_DIR}/rp-access.log combined
@@ -90,4 +90,71 @@ ferdi@testdebian1:~$ sudo systemctl reload apache2
 ```
 ### Adding temporary DNS entry to test the HTTPS setup
 You have to make sure that **newsite.fsmn.xyz** resolves to your **new server**'s public IP
-### to be continued... :-)
+### Requesting SSL certificate to Let's Encrypt
+Just like that! The certificate will be requested and fetched (and a cron job will be created to take care of renewals) and our **revproxy.conf** will be automagically modified by:
+- adding **RewriteEngine/RewriteCond/RewriteRule** to redirect HTTP calls to HTTPS
+- referencing the new certificate
+```
+ferdi@testdebian1:~$ sudo certbot --apache -d newsite.fsmn.xyz
+...
+```
+### Reloading Apache and test
+To have our new configuration in place, you have to reload Apache
+```
+sudo systemctl reload apache2
+```
+Now you can test the redirection via browser, pointing at **https://newsite.fsmn.xyz**
+When you're satisfied with your tests, it's time to 
+
+### Add oldsite.fsmn.xyz as ServerAlias inside your revproxy.conf
+Just below the ServerName directive on both VirtualHosts (**\*:80** and **\*:443**), add the line
+```
+ServerAlias oldsite.fsmn.xyz
+```
+And reload Apache
+```
+sudo systemctl reload apache2
+```
+Now it's time to switch **oldsite.fsmn.xyz** DNS entry to point at the new IP **(better doing that off-hours)**.
+### Expanding Certbot-provided SSL certificate
+Next (quick) action should be to update our SSL certificate to include oldsite.fsmn.xyz.
+```
+ferdi@testdebian1:~$ sudo certbot --apache -d newsite.fsmn.xyz -d oldsite.fsmn.xyz
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+You have an existing certificate that contains a portion of the domains you
+requested (ref: /etc/letsencrypt/renewal/www.fsmn.xyz.conf)
+
+It contains these names: newsite.fsmn.xyz
+
+You requested these names for the new certificate: newsite.fsmn.xyz, oldsite.fsmn.xyz.
+
+Do you want to expand and replace this existing certificate with the new
+certificate?
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+(E)xpand/(C)ancel: e
+Renewing an existing certificate for newsite.fsmn.xyz and 1 more domain
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/newsite.fsmn.xyz/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/newsite.fsmn.xyz/privkey.pem
+This certificate expires on 2023-02-15.
+These files will be updated when the certificate renews.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+Deploying certificate
+Successfully deployed certificate for newsite.fsmn.xyz to /etc/apache2/sites-enabled/revproxy.conf
+Successfully deployed certificate for oldsite.fsmn.xyz to /etc/apache2/sites-enabled/revproxy.conf
+Your existing certificate has been successfully renewed, and the new certificate has been installed.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+```
+and reloading Apache as usual (just in case)
+```
+sudo systemctl reload apache2
+```
