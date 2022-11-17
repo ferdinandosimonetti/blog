@@ -1,6 +1,6 @@
 AUTHOR = 'Ferdinando Simonetti'
 SITENAME = "Ferdinando Simonetti's personal pages"
-SITEURL = 'https://blog.fsmn.xyz'
+SITEURL = 'https://blog.fsimonetti.info'
 
 PATH = 'content'
 
