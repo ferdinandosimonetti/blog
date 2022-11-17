@@ -5,7 +5,9 @@ Date: 2022-11-16
 
 # Apache setup on Debian 11
 
+## Credits/bibliography
 I've been following this site's hints here
+
 https://blog.containerize.com/2021/05/21/how-to-configure-apache-as-a-reverse-proxy-for-ubuntudebian/
 
 ## Assumptions
