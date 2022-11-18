@@ -64,4 +64,39 @@ Subsequent **caddy** run with same parameters doesn't show this hint anymore.
 
 ### How to convert this command in a Caddyfile suitable to systemd daemon?
 
-To be continued...
+Thanks to Markus Dosch for his blog article here
+
+https://www.markusdosch.com/2022/05/caddy-web-server-why-use-it-how-to-use-it/
+
+I've set up the main **/etc/caddy/Caddyfile** and the directory structure reminiscent of Apache's own **/etc/caddy/sites-available**.
+
+The main **Caddyfile** contains now global options like my own email address, and an *import* directive.
+
+```
+root@fsmntest0:/etc/caddy/sites-enabled# cat /etc/caddy/Caddyfile
+{
+    email info@fsimonetti.info
+}
+
+import /etc/caddy/sites-enabled/*.caddy
+```
+
+My **revproxy.caddy** (inside *sites-enabled* subdir) is here:
+
+```
+newsite.fsimonetti.info {
+    log {
+        output file /var/log/caddy/blog-access.log
+    }
+    reverse_proxy {
+        to https://blog.fsimonetti.info
+        header_up Host {upstream_hostport}
+    }
+}
+```
+
+The most important directive here is the **header_up** that, according to official documentation found here 
+
+https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#https
+
+Enables us to rewrite the **Host** header of the request going to the upstream (backend for other reverse proxies out there) with **its own FQDN** as declared in **to** directive above.
