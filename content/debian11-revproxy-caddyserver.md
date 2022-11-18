@@ -1,7 +1,9 @@
 Title: Using Caddyserver on Debian11 to reverse proxy a legacy HTTPS site: no need for Certbot
 Author: Ferdinando Simonetti
 Tags: Debian11, Caddyserver, Reverse Proxy
+Category: UNIX
 Date: 2022-11-17
+Modified: 2022-11-18
 
 # Caddyserver setup on Debian 11
 

@@ -1,9 +1,11 @@
 Title: Using Debian 11's Apache to reverse proxy a legacy HTTPS site, with SSL certificate provided by Certbot/Let'sEncrypt
 Author: Ferdinando Simonetti
 Tags: Debian11, Apache, Reverse Proxy, Certbot
+Category: UNIX
 Date: 2022-11-16
+Modified: 2022-11-18
 
-# Apache setup on Debian 11
+# Apache reverse proxy setup on Debian 11
 
 ## Credits/bibliography
 I've been following this site's hints here

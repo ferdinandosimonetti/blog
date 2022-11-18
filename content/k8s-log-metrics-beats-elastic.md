@@ -1,9 +1,10 @@
 Title: Monitoring and logging for Kubernetes via Beats -> ElasticSearch (ECK or Elastic Cloud managed service), visualization with Kibana
 Author: Ferdinando Simonetti
 Tags: Kubernetes, k8s, Metricbeat, Filebeat, logging, monitoring, Elastisearch, ElasticCloud
+Category: Kubernetes
 Date: 2022-11-18
 
-# Monitoring and logging for Kubernetes via Beats -> ElasticSearch (ECK or Elastic Cloud managed service), visualization with Kibana
+# Monitoring and logging for Kubernetes via Beats -> ElasticSearch
 
 First of all, neither the monitored (test) AKS cluster nor the ElasticCloud (test) instance exist anymore, so I've kept the YAML files nearly unedited.
 You'll find them (complete version) at the end of the article, while throughout it I'll reference some snippets of them.
