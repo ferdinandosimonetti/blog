@@ -5,8 +5,7 @@ Category: UNIX
 Date: 2022-11-16
 Modified: 2022-11-18
 
-# Apache reverse proxy setup on Debian 11
-
+A common requirement when dealing with obsolete combination of OS and applications.
 ## Credits/bibliography
 I've been following this site's hints here
 

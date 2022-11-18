@@ -5,7 +5,7 @@ Category: UNIX
 Date: 2022-11-17
 Modified: 2022-11-18
 
-# Caddyserver setup on Debian 11
+Using a more modern and lightweight way for dealing with obsolete combos of OSs and application versions.
 
 ## Credits/bibliography
 I've been following Caddyserver's official site guidance here
