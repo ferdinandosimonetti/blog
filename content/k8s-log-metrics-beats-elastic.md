@@ -12,11 +12,11 @@ Of course there's a lot of space for refining them, like referencing secrets for
 
 **Metricbeat** relies, to obtain some relevant data, on Kube-State-Metrics, you'll have to deploy it first (on kube-system namespace).
 
-https://artifacthub.io/packages/helm/prometheus-community/kube-state-metrics
+[https://artifacthub.io/packages/helm/prometheus-community/kube-state-metrics](https://artifacthub.io/packages/helm/prometheus-community/kube-state-metrics)
 
 ## Destination environments
 
-- **Elastic Cloud**: https://cloud.elastic.co
+- **Elastic Cloud**: [https://cloud.elastic.co](https://cloud.elastic.co)
 
 ![ElasticCloud: choose where and how for your deployment](images/elasticcloud-00-create-deploy.png)
 ![ElasticCloud: write down your root creds](images/elasticcloud-01-create-new-env-get-passwords.png)
@@ -35,7 +35,7 @@ You need to specify only the CloudID and Cloud Auth informations, the Elastic/Ki
           value: "elastic:J0wA0yLuVs3RJRXix8YifX5X"
 ```
 
-- **Elastic Cloud on Kubernetes (ECK)**: https://www.elastic.co/guide/en/cloud-on-k8s/current/index.html
+- **Elastic Cloud on Kubernetes (ECK)**: [https://www.elastic.co/guide/en/cloud-on-k8s/current/index.html](https://www.elastic.co/guide/en/cloud-on-k8s/current/index.html)
 
 You'll need to specify both Elastic and Kibana endpoints (IP and port), as well as their credentials (maybe, by copying the ECK generated secret from the destination cluster)
 

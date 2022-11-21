@@ -9,7 +9,7 @@ A common requirement when dealing with obsolete combination of OS and applicatio
 ## Credits/bibliography
 I've been following this site's hints here
 
-https://blog.containerize.com/2021/05/21/how-to-configure-apache-as-a-reverse-proxy-for-ubuntudebian/
+[https://blog.containerize.com/2021/05/21/how-to-configure-apache-as-a-reverse-proxy-for-ubuntudebian/](https://blog.containerize.com/2021/05/21/how-to-configure-apache-as-a-reverse-proxy-for-ubuntudebian/)
 
 ## Assumptions
 - Your old, not updateable combo of webserver and application has IP address **192.168.105.37**

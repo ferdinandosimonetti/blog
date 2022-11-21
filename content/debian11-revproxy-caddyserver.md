@@ -10,7 +10,7 @@ Using a more modern and lightweight way for dealing with obsolete combos of OSs 
 ## Credits/bibliography
 I've been following Caddyserver's official site guidance here
 
-https://caddyserver.com/
+[https://caddyserver.com/](https://caddyserver.com/)
 
 ### Installing Caddy
 
@@ -68,7 +68,7 @@ Subsequent **caddy** run with same parameters doesn't show this hint anymore.
 
 Thanks to Markus Dosch for his blog article here
 
-https://www.markusdosch.com/2022/05/caddy-web-server-why-use-it-how-to-use-it/
+[https://www.markusdosch.com/2022/05/caddy-web-server-why-use-it-how-to-use-it/](https://www.markusdosch.com/2022/05/caddy-web-server-why-use-it-how-to-use-it/)
 
 I've set up the main **/etc/caddy/Caddyfile** and the directory structure reminiscent of Apache's own **/etc/caddy/sites-available**.
 
@@ -99,6 +99,6 @@ newsite.fsimonetti.info {
 
 The most important directive here is the **header_up** that, according to official documentation found here 
 
-https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#https
+[https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#https](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#https)
 
 Enables us to rewrite the **Host** header of the request going to the upstream (backend for other reverse proxies out there) with **its own FQDN** as declared in **to** directive above.
