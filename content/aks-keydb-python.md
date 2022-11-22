@@ -6,6 +6,7 @@ Date: 2022-11-21
 Modified: 2022-11-22
 
 Today's task: verifying that a Keydb cluster, when deployed via Helm with default values (apart from activating LoadBalancer Service and a custom password), could be resilient to the sudden *death* of any one of its composing Pods, with no client connection's disruption.
+
 Also today's task: learn to interact with Redis/Keydb via Python.
 
 ## References
@@ -90,7 +91,7 @@ kubernetes       ClusterIP      10.0.0.1      <none>        443/TCP             
 
 ## Redis cluster support with Python
 
-The *go-to* Python library [redis-py](https://redis-py.readthedocs.io/en/stable/) to interact with Redis used to lack **cluster* support.
+The *go-to* Python library [redis-py](https://redis-py.readthedocs.io/en/stable/) to interact with Redis used to lack **cluster** support.
 In 2022, AWS people added this functionality (previously you had to choose another library to work with Redis clusters) to **redis-py**, as described [here](https://aws.amazon.com/blogs/opensource/new-cluster-mode-support-in-redis-py/).
 However, when using this library against a KeyDB cluster, you **should not** instantiate a **RedisCluster** object: you should use the plain-and-simple **Redis** object, letting the internal KeyDB synchronization mechanism to work with your data.
 There is also a [KeyDB-specific Python library](https://pypi.org/project/keydb/) but its development seems to have stopped 3 years ago.
