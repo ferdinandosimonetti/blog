@@ -2,7 +2,7 @@ Title: Using a Microsoft AKS cluster to test Keydb's resilience with Python clie
 Author: Ferdinando Simonetti
 Tags: Kubernetes, Kubie, AKS, Redis, Keydb, Python 
 Category: Kubernetes
-State: Draft
+Status: Draft
 Date: 2022-11-21
 
 Today's task: verifying that a Keydb cluster, when deployed via Helm with default values (apart from activating LoadBalancer Service and a custom password), could be resilient to the sudden *death* of any one of its composing Pods, with no client connection's disruption.
