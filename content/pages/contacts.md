@@ -10,3 +10,5 @@ Author: Ferdinando Simonetti
 **ZIP code**: 16162
 
 **E-mail**: info@fsimonetti.info
+
+**Mastodon**: [@rimmon1971@fosstodon.org](https://fosstodon.org/@rimmon1971)
