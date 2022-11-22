@@ -2,8 +2,8 @@ Title: Using a Microsoft AKS cluster to test Keydb's resilience with Python clie
 Author: Ferdinando Simonetti
 Tags: Kubernetes, Kubie, AKS, Redis, Keydb, Python 
 Category: Kubernetes
-Status: Draft
 Date: 2022-11-21
+Modified: 2022-11-22
 
 Today's task: verifying that a Keydb cluster, when deployed via Helm with default values (apart from activating LoadBalancer Service and a custom password), could be resilient to the sudden *death* of any one of its composing Pods, with no client connection's disruption.
 Also today's task: learn to interact with Redis/Keydb via Python.
@@ -17,6 +17,9 @@ Also today's task: learn to interact with Redis/Keydb via Python.
 - **KeyDB Helm Chart**: [https://artifacthub.io/packages/helm/enapter/keydb](https://artifacthub.io/packages/helm/enapter/keydb)
 
 - **Using Python to interact with Redis**: [https://realpython.com/python-redis/](https://realpython.com/python-redis/)
+- **Best practices for Redis clients**: [https://aws.amazon.com/blogs/database/best-practices-redis-clients-and-amazon-elasticache-for-redis/](https://aws.amazon.com/blogs/database/best-practices-redis-clients-and-amazon-elasticache-for-redis/)
+
+- **How to setup HAProxy for Sentinel on Kubernetes**: [https://yaniv-bhemo.medium.com/how-to-setup-haproxy-for-redis-sentinel-on-kubernetes-37ee70e44464](https://yaniv-bhemo.medium.com/how-to-setup-haproxy-for-redis-sentinel-on-kubernetes-37ee70e44464)
 
 ## Reusing an existing, test, AKS cluster
 
@@ -88,7 +91,9 @@ kubernetes       ClusterIP      10.0.0.1      <none>        443/TCP             
 ## Redis cluster support with Python
 
 The *go-to* Python library [redis-py](https://redis-py.readthedocs.io/en/stable/) to interact with Redis used to lack **cluster* support.
-In 2022, AWS people added this functionality (previously you had to choose another library to work with Redis clusters) to **redis-py**, as [described here](https://aws.amazon.com/blogs/opensource/new-cluster-mode-support-in-redis-py/).
+In 2022, AWS people added this functionality (previously you had to choose another library to work with Redis clusters) to **redis-py**, as described [here](https://aws.amazon.com/blogs/opensource/new-cluster-mode-support-in-redis-py/).
+However, when using this library against a KeyDB cluster, you **should not** instantiate a **RedisCluster** object: you should use the plain-and-simple **Redis** object, letting the internal KeyDB synchronization mechanism to work with your data.
+There is also a [KeyDB-specific Python library](https://pypi.org/project/keydb/) but its development seems to have stopped 3 years ago.
 
 ## A Python virtualenv
 
@@ -125,3 +130,208 @@ redis==4.3.4
 wrapt==1.14.1
 ```
 
+## Poor man's Redis reader and writer
+
+The goal is to verify the resilience of a KeyDB cluster, so there's nothing fancy in the code, apart from the retry_with_backoff function shamelessly stolen from the *Best Practices*'s AWS link.
+
+### library.py
+
+```
+import redis
+import random
+from time import sleep
+from redis.exceptions import ConnectionError, TimeoutError
+
+def run_with_backoff(function, retries=5):
+    base_backoff = 0.1
+    max_backoff  = 10
+    tries = 0
+    while True:
+        try:
+            return function()
+        except (ConnectionError,TimeoutError):
+            if tries >= retries:
+                raise
+            backoff = min(max_backoff, base_backoff * (pow(2, tries) + random.random()))
+            print(f"sleeping for {backoff:.2f}s")
+            sleep(backoff)
+            tries += 1
+```
+
+### writer.py
+
+```
+from library import *
+
+random.seed(444)
+
+pool = redis.BlockingConnectionPool(host='EDITED',port='6379',password='Savignone.2015',decode_responses=True)
+r = redis.Redis(connection_pool=pool)
+
+while True:
+    for i in range(1000):
+        valore = random.getrandbits(64)
+        rs = run_with_backoff(lambda: r.set(f"chiave{i}",valore))
+        print(f"{i} {valore} {rs}")
+```
+### reader.py
+
+```
+from library import *
+
+random.seed(555)
+
+pool = redis.BlockingConnectionPool(host='EDITED',port='6379',password='Savignone.2015',decode_responses=True)
+r = redis.Redis(connection_pool=pool)
+
+while True:
+    chiave = random.randint(0,999)
+    valore = run_with_backoff(lambda: r.get(f"chiave{chiave}"))
+    print(f"{chiave} {valore}")
+```
+
+## First results
+
+I launched both *reader.py* and *writer.py* from within the virtual environment, and I noticed that often, deleting one of the Pods part of the KeyDB StatefulSet, my client's connection was interrupted (and therefore the retry mechanism kicked in).
+
+The customer, however, reads and writes Redis data in a way that doesn't tolerate connectivity loss.
+
+So, next step: remove LoadBalancer Service from KeyDB (actually, I'm lazy, I'm letting it in place for now) and put **HAProxy** in front of it, exposing the **proxy** instead.
+
+## Putting HAProxy at work
+
+First of all: kudos to [Yaniv Ben Hemo](https://yaniv-bhemo.medium.com/about) for *putting it simple* with HAProxy on Kubernetes: relying on Kubernetes' DNS capabilities to resolve the individual KeyDB Pod's IP addresses is **effective**.
+
+I've modified only the **ConfigMap** to reflect the fact that KeyDB is multi-master active-replica by default, and thus the writes can be distributed freely on each active backend node.
+
+Additionally, I'm looking for *role:active-replica* and not *role:master* for the same reason.
+
+Below there's a screenshot of HAProxy's stats page taken when I went berserk and killed **two out of three* KeyDB pods.
+Both *reader* and *writer* Python scripts never noticed (after having been pointed to the *new* public IP).
+
+![HAProxy Stats page](images/haproxy-keydb.png)
+
+And then, the complete YAML (Service, ConfigMap, Deployment) for our marvellous HAProxy.
+
+```
+apiVersion: /v1
+kind: Service
+metadata:
+  name: haproxy-service
+  namespace: default
+spec:
+  type: LoadBalancer
+  ports:
+    - name: dashboard
+      port: 8080
+      targetPort: 8080
+    - name: redis-write
+      port: 6379
+      targetPort: 6379
+  selector:
+    app: haproxy
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: haproxy-config
+  namespace: default
+data:
+  haproxy.cfg: |
+    global
+    	daemon
+    	maxconn 256
+    
+    defaults
+    	mode tcp
+    	timeout connect 5000ms
+    	timeout client 50000ms
+    	timeout server 50000ms
+    
+    
+    frontend http
+    	bind :8080
+    	default_backend stats    
+    
+    backend stats
+    	mode http
+    	stats enable
+    
+    	stats enable
+    	stats uri /
+    	stats refresh 1s
+    	stats show-legends
+    	stats admin if TRUE
+    
+    resolvers k8s
+      parse-resolv-conf
+      hold other           10s
+      hold refused         10s
+      hold nx              10s
+      hold timeout         10s
+      hold valid           10s
+      hold obsolete        10s
+    
+    frontend redis-write
+        bind *:6379
+    	default_backend redis-online
+    
+    backend redis-online
+    	mode tcp
+    	balance roundrobin
+    	option tcp-check
+    	tcp-check send AUTH\ Savignone.2015\r\n
+    	tcp-check expect string +OK
+    	tcp-check send PING\r\n
+    	tcp-check expect string +PONG
+      tcp-check send info\ replication\r\n
+    	tcp-check expect string role:active-replica
+      server-template keydb 3 server._tcp.keydb-headless.default.svc.cluster.local:6379 check inter 1s resolvers k8s init-addr none
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haproxy-deployment
+  namespace: default
+  labels:
+    app: haproxy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: haproxy
+  template:
+    metadata:
+      name: haproxy-pod
+      labels:
+        app: haproxy
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - haproxy
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: haproxy
+          image: haproxy:2.3
+          ports:
+            - containerPort: 8080
+            - containerPort: 6379
+            - containerPort: 6380
+          volumeMounts:
+          - name: config
+            mountPath: /usr/local/etc/haproxy/haproxy.cfg
+            subPath: haproxy.cfg
+            readOnly: true
+      restartPolicy: Always
+      volumes:
+      - name: config
+        configMap:
+          name: haproxy-config
+```
