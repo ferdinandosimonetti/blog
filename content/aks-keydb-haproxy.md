@@ -137,6 +137,7 @@ data:
     	tcp-check expect string role:active-replica
       server-template keydb 3 server._tcp.keydb-headless.default.svc.cluster.local:6379 check inter 1s resolvers k8s init-addr none
 ```
+## Redeploy HAProxy
 
 After having applied this configuration, we're going to redeploy HAProxy to make use of the template.
 
