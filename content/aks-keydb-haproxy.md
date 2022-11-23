@@ -135,6 +135,8 @@ data:
     	tcp-check expect string +PONG
       tcp-check send info\ replication\r\n
     	tcp-check expect string role:active-replica
+      tcp-check send QUIT\r\n
+      tcp-check expect string +OK
       server-template keydb 3 server._tcp.keydb-headless.default.svc.cluster.local:6379 check inter 1s resolvers k8s init-addr none
 ```
 ## Redeploy HAProxy
