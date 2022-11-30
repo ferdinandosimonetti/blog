@@ -17,14 +17,15 @@ AUTHOR_FEED_RSS = None
 RELATIVE_URLS = True
 
 # Blogroll
-LINKS = (('Pelican', 'https://getpelican.com/'),
+LINKS = (('Terraform', 'https://www.terraform.io/'),
+         ('Ansible', 'https://www.ansible.com/'),
          ('Python.org', 'https://www.python.org/'),
          ('Kubernetes', 'https://kubernetes.io/'),
          ('vRealize Automation', 'https://docs.vmware.com/en/vRealize-Automation/index.html'),)
 
 # Social widget
-SOCIAL = (('Mastodon ITA', 'https://mastodon.uno/@rimmon1971'),
-          ('Mastodon Tech', 'https://fosstodon.org/@rimmon1971'),
+SOCIAL = (('Pixelfed', 'https://pixelfed.uno/@rimmon1971'),
+          ('Peertube', 'https://peertube.uno/@rimmon1971'),
           ('LinkedIN', 'https://www.linkedin.com/in/ferdinandosimonetti'),
           ('Github', 'https://github.com/ferdinandosimonetti'),)
 

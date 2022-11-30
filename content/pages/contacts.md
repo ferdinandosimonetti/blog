@@ -1,20 +1,18 @@
 Title: Contacts
 Author: Ferdinando Simonetti
+### Snail-mail
 
-**Country**: Italy
+Via Barchetta 14C/12, 16162 Genova (GE), Italy
+### E-mail
 
-**City**: Genova
+[info@fsimonetti.info](mailto:info@fsimonetti.info)
 
-**Postal address**: Via Barchetta 14C/12
-
-**ZIP code**: 16162
-
-**E-mail**: [info@fsimonetti.info](mailto:info@fsimonetti.info)
+### Mastodon
 
 <div name=mastodon-work>
-<a rel="me" href="https://fosstodon.org/@rimmon1971">Mastodon IT-related</a>
+<a rel="me" href="https://fosstodon.org/@rimmon1971">IT-related</a>
 </div>
 
 <div name=mastodon-personal>
-<a rel="me" href="https://mastodon.uno/@rimmon1971">Mastodon personal</a>
+<a rel="me" href="https://mastodon.uno/@rimmon1971">Personal</a>
 </div>
