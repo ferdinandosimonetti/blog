@@ -3,6 +3,7 @@ Author: Ferdinando Simonetti
 Tags: Kubernetes, Linkerd, Cert-Manager, Step CLI, Ubuntu 22.04, nf_tables
 Category: Kubernetes
 Date: 2022-12-09
+Modified: 2022-12-10
 
 Here are my findings about LinkerD Service Mesh and its *mutual automatic TLS* feature that encrypts communications between meshed Pods without any modification needed to them.
 
@@ -469,61 +470,453 @@ Status check results are √
 | Memcache          | 11211                  | Yes              |       |
 | MySQL with Galera	| 3306, 4444, 4567, 4568 | Partially	      | Ports 4567 and 4568 are not in Linkerd’s default set of opaque ports |
 
-#### Testbed
+## Using LinkerD to secure the traffic
 
-Install the Emojivoto test app
-
-```
-[test0|linkerd] ferdi@DESKTOP-NL6I2OD:~$ curl --proto '=https' --tlsv1.2 -sSfL https://run.linkerd.io/emojivoto.yml \
-  | kubectl apply -f -
-namespace/emojivoto created
-serviceaccount/emoji created
-serviceaccount/voting created
-serviceaccount/web created
-service/emoji-svc created
-service/voting-svc created
-service/web-svc created
-deployment.apps/emoji created
-deployment.apps/vote-bot created
-deployment.apps/voting created
-deployment.apps/web created
-[test0|linkerd] ferdi@DESKTOP-NL6I2OD:~$ kubie ns emojivoto
-```
-
-And inject the LinkerD proxy component on every Deployment found
-
-```
-[test0|linkerd] ferdi@DESKTOP-NL6I2OD:~$ kubie ns emojivoto
-[test0|emojivoto] ferdi@DESKTOP-NL6I2OD:~$ kubectl get -n emojivoto deploy -o yaml \ \
-  | linkerd inject - \
-  | kubectl apply -f -
-
-deployment "emoji" injected
-deployment "vote-bot" injected
-deployment "voting" injected
-deployment "web" injected
-
-deployment.apps/emoji configured
-deployment.apps/vote-bot configured
-deployment.apps/voting configured
-deployment.apps/web configured
-```
-
-#### Visualization tool
-
-Let's install Linkerd's Web interface
-
-```
-helm upgrade --install linkerd-viz \
-  --namespace linkerd-viz \
-  --create-namespace \
-  linkerd/linkerd-viz
-```
-
-And use it to check if the traffic between the injected pods.
-
-### Securing the traffic
+Here, as usual, there are some references
 
 - [Basics on restricting access](https://linkerd.io/2.12/tasks/restricting-access/)
 - [Policies](https://linkerd.io/2.12/reference/authorization-policy/)
 - [Linkerd with K8S Jobs](https://itnext.io/three-ways-to-use-linkerd-with-kubernetes-jobs-c12ccc6d4c7c)
+
+### Enabling *default-deny* firewall policy
+
+Let's upgrade again our LinkerD Helm Chart configuration:
+
+```
+[test0|linkerd] ferdi@DESKTOP-NL6I2OD:~$ helm upgrade --install linkerd-control-plane \
+  --namespace linkerd \
+  --set-file identityTrustAnchorsPEM=ca.crt \
+  --set identity.issuer.scheme=kubernetes.io/tls \
+  --set "proxyInit.iptablesMode=nft" \
+  --set "proxyInit.runAsRoot=true" \
+  --set "proxy.defaultInboundPolicy=deny" \
+  linkerd/linkerd-control-plane
+```
+
+This way, we ensure that LinkerD-meshed Pods could only be contacted by predetermined entities
+
+### Test deployments
+
+We're going to use custom ServiceAccounts for each Deployment, to show two different ways to select the client side of the allowed connection.
+
+```
+# File: whoami.yml
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: whoami1
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: whoami2
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: whoami3
+  namespace: default
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: whoami1
+  name: whoami1
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whoami1
+  template:
+    metadata:
+      labels:
+        app: whoami1
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - image: containous/whoami
+        imagePullPolicy: Always
+        name: whoami
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+      - args:
+        - -c
+        - sleep 999999999
+        command:
+        - /bin/bash
+        image: nicolaka/netshoot
+        imagePullPolicy: Always
+        name: netshoot
+        resources: {}
+      serviceAccount: whoami1
+      serviceAccountName: whoami1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: whoami2
+  name: whoami2
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whoami2
+  template:
+    metadata:
+      labels:
+        app: whoami2
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - image: containous/whoami
+        imagePullPolicy: Always
+        name: whoami
+        ports:
+        - containerPort: 80
+          protocol: TCP
+      - args:
+        - -c
+        - sleep 999999999
+        command:
+        - /bin/bash
+        image: nicolaka/netshoot
+        imagePullPolicy: Always
+        name: netshoot
+      serviceAccount: whoami2
+      serviceAccountName: whoami2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: whoami3
+  name: whoami3
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whoami3
+  template:
+    metadata:
+      labels:
+        app: whoami3
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - image: containous/whoami
+        imagePullPolicy: Always
+        name: whoami
+        ports:
+        - containerPort: 80
+          protocol: TCP
+      - args:
+        - -c
+        - sleep 999999999
+        command:
+        - /bin/bash
+        image: nicolaka/netshoot
+        imagePullPolicy: Always
+        name: netshoot
+      serviceAccount: whoami3
+      serviceAccountName: whoami3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: whoami1
+  name: whoami1
+  namespace: default
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: whoami1
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: whoami2
+  name: whoami2
+  namespace: default
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: whoami2
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: whoami3
+  name: whoami3
+  namespace: default
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: whoami3
+  sessionAffinity: None
+  type: ClusterIP
+```
+
+
+### LinkerD-izing deployments
+
+The deployments defined above haven't been LinkerD-ized yet! Let's use **linkerd** CLI tool to produce an edited version of the same YAML.
+
+```
+[test0|default] ferdi@DESKTOP-NL6I2OD:~/linkerdtest$ cat whoami.yml | linkerd inject - | tee whoami-injected.yml
+```
+
+Below there's an excerpt of the new YAML, detailing one of the updated Deployments:
+
+```
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: whoami1
+  name: whoami1
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whoami1
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: whoami1
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - image: containous/whoami
+        imagePullPolicy: Always
+        name: whoami
+        ports:
+        - containerPort: 80
+          protocol: TCP
+      - args:
+        - -c
+        - sleep 999999999
+        command:
+        - /bin/bash
+        image: nicolaka/netshoot
+        imagePullPolicy: Always
+        name: netshoot
+      serviceAccount: whoami1
+      serviceAccountName: whoami1
+``` 
+
+### Definining rules
+
+We're going to define the *firewall rules* (LinkerD calls them **ServerAuthorizations**) first, and only after that, the corresponding *targets* (**Servers** for LinkerD).
+
+This way, we're sure that our defined rules will be applied instantly after the creation of the *Server** custom resource.
+
+#### Identifying the destination (Server) by resource name
+
+```
+---
+apiVersion: policy.linkerd.io/v1beta1
+kind: ServerAuthorization
+metadata:
+  namespace: default
+  name: whoami2-whoami1-auth
+  labels:
+    app.kubernetes.io/part-of: whoami
+    app.kubernetes.io/name: whoami2-whoami1
+spec:
+  # the Server whoami1 can be contacted by Pods running with whoami2 ServiceAccount
+  server:
+    name: whoami1-server
+  client:
+    meshTLS:
+      serviceAccounts:
+        - name: whoami2
+```
+
+#### Identifying the destination (Server) by resource label(s)
+
+```
+---
+apiVersion: policy.linkerd.io/v1beta1
+kind: ServerAuthorization
+metadata:
+  namespace: default
+  name: whoami3-whoami1-auth
+  labels:
+    app.kubernetes.io/part-of: whoami
+    app.kubernetes.io/name: whoami3-whoami1
+spec:
+  # the Server labeled app=whoami1 can be contacted by Pods running with whoami2 ServiceAccount
+  server:
+    selector:
+      matchLabels:
+        app: whoami1
+  client:
+    meshTLS:
+      serviceAccounts:
+        - name: whoami3
+```
+
+#### Defining the Server (connection destination)
+
+```
+---
+apiVersion: policy.linkerd.io/v1beta1
+kind: Server
+metadata:
+  namespace: default
+  name: whoami1-server
+  labels:
+    app: whoami1
+spec:
+  podSelector:
+    matchLabels:
+      app: whoami1
+  port: 80
+  proxyProtocol: HTTP/1
+```
+
+### Testing the ServerAuthorizations/Server combination
+
+These are my currently running Pods, for reference
+
+```
+[test0|default] ferdi@DESKTOP-NL6I2OD:~/linkerdtest$ kubectl get po
+NAME                       READY   STATUS    RESTARTS   AGE
+whoami1-6cccb5f954-mjmgg   3/3     Running   0          3h
+whoami2-689d97cf87-7p5s7   3/3     Running   0          3h
+whoami3-7689d5fbc6-7n7l9   3/3     Running   0          3h
+``` 
+#### From whoami2's sidecar container
+
+```
+[test0|default] ferdi@DESKTOP-NL6I2OD:~/linkerdtest$ kubectl exec -ti whoami2-689d97cf87-7p5s7 -c netshoot -- bash
+bash-5.2# curl -v http://whoami1/
+*   Trying 10.43.253.230:80...
+* Connected to whoami1 (10.43.253.230) port 80 (#0)
+> GET / HTTP/1.1
+> Host: whoami1
+> User-Agent: curl/7.86.0
+> Accept: */*
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< date: Sat, 10 Dec 2022 14:45:01 GMT
+< content-length: 299
+< content-type: text/plain; charset=utf-8
+<
+Hostname: whoami1-6cccb5f954-mjmgg
+IP: 127.0.0.1
+IP: 10.42.0.31
+RemoteAddr: 10.42.0.31:57388
+GET / HTTP/1.1
+Host: whoami1
+User-Agent: curl/7.86.0
+Accept: */*
+L5d-Client-Id: whoami2.default.serviceaccount.identity.linkerd.cluster.local
+L5d-Dst-Canonical: whoami1.default.svc.cluster.local:80
+
+* Connection #0 to host whoami1 left intact
+bash-5.2#
+``` 
+
+Yeah! It works!
+
+#### From whoami3's sidecar container
+
+```
+[test0|default] ferdi@DESKTOP-NL6I2OD:~/linkerdtest$ kubectl exec -ti whoami3-7689d5fbc6-7n7l9 -c netshoot -- bash
+bash-5.2# curl -v http://whoami1
+*   Trying 10.43.253.230:80...
+* Connected to whoami1 (10.43.253.230) port 80 (#0)
+> GET / HTTP/1.1
+> Host: whoami1
+> User-Agent: curl/7.86.0
+> Accept: */*
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< date: Sat, 10 Dec 2022 14:46:24 GMT
+< content-length: 299
+< content-type: text/plain; charset=utf-8
+<
+Hostname: whoami1-6cccb5f954-mjmgg
+IP: 127.0.0.1
+IP: 10.42.0.31
+RemoteAddr: 10.42.0.31:51432
+GET / HTTP/1.1
+Host: whoami1
+User-Agent: curl/7.86.0
+Accept: */*
+L5d-Client-Id: whoami3.default.serviceaccount.identity.linkerd.cluster.local
+L5d-Dst-Canonical: whoami1.default.svc.cluster.local:80
+
+* Connection #0 to host whoami1 left intact
+bash-5.2#
+```
+
+This one, too
+
+#### A connection from an unauthorized resource, within the cluster
+
+Whoo-hoo, I'm a bad guy trying to reach our precious whoami1
+
+```
+[test0|default] ferdi@DESKTOP-NL6I2OD:~/linkerdtest$ kubectl run badguy -ti --rm --image=nicolaka/netshoot -- bash
+If you don't see a command prompt, try pressing enter.
+bash-5.2# curl -v http://whoami1
+*   Trying 10.43.253.230:80...
+* Connected to whoami1 (10.43.253.230) port 80 (#0)
+> GET / HTTP/1.1
+> Host: whoami1
+> User-Agent: curl/7.86.0
+> Accept: */*
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 403 Forbidden
+< content-length: 0
+< date: Sat, 10 Dec 2022 14:49:24 GMT
+<
+* Connection #0 to host whoami1 left intact
+bash-5.2#
+```
+
+... and I miserably fail to connect!
