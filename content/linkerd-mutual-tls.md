@@ -497,7 +497,7 @@ This way, we ensure that LinkerD-meshed Pods could only be contacted by predeter
 
 ### Test deployments
 
-We're going to use custom ServiceAccounts for each Deployment, to show two different ways to select the client side of the allowed connection.
+We're going to use custom ServiceAccounts for each Deployment (it's a requirement to identify the client side) and we'll show two different ways to select the server side of the allowed connection.
 
 ```
 # File: whoami.yml
