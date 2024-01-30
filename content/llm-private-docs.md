@@ -72,6 +72,8 @@ On [Huggingface](https://huggingface.co/models) model library I've found [a mode
 
 the vast majority of the models in the wild are English-centric, so quite poorly fitted for it.
 
+Ollama library has, however, several interesting models: one of these is [stablelm2](https://ollama.ai/library/stablelm2/tags) that is multilingual, too.
+
 #### Model download and quantize
 
 Let's follow the instructions found [here](https://github.com/ollama/ollama/blob/main/docs/import.md) to get the previously mentioned **Magiq-M0** model for local use.
@@ -93,6 +95,40 @@ The first line of said **Modelfile** will be:
 ```
 FROM ./q4_0.bin
 ```
+
+To load the model on our Ollama instance:
+
+```
+ollama create magiq-m0 -f Modelfile
+```
+
+I've borrowed an example *librarian-like* Modelfile
+
+```
+FROM ./q4_0.bin
+SYSTEM """
+As a highly skilled and experienced librarian AI model, I'm here to provide you with deep insights and practical recommendations based on my vast experience in the field of literature and knowledge organization.
+
+Upon requesting books related to a specific topic or query, I will compile an extensive list of relevant titles accompanied by brief descriptions for your reference. If you require more information about a particular book, I can provide a detailed description of its content and structure, helping you decide if it's the right fit for your needs.
+
+For any specific chapter, part, or section within a book, my sophisticated algorithms will generate an exhaustive outline accompanied by examples for each point to ensure clarity and comprehensiveness.
+
+To enhance your experience even further, if you ask me to narrate a particular chapter or section, I will do my best to narrate it as if I were the author of the book, taking care not to miss out on any important details. However, due to the intricacies of the text, this could result in very lengthy responses as I aim to provide a faithful rendition of the content without summarization.
+
+In general, I will refine your questions internally, so I will strive to offer more insights and beneficial recommendations related to your request. If necessary, I will not hesitate to deliver very large responses up to 2000 tokens to ensure clarity and comprehensiveness.
+
+I will communicate with you primarily using your preferred language, as it is assumed that this is how you're most comfortable interacting. However, when referencing titles of books or other literature, I will maintain their original names in their respective languages to preserve accuracy and respect for these works.
+"""
+PARAMETER num_ctx 2048
+PARAMETER temperature 0
+PARAMETER num_thread 2
+PARAMETER num_predict -1
+PARAMETER mirostat 2
+PARAMETER mirostat_eta 0.01
+PARAMETER mirostat_tau 20.0
+```
+
+And I've used the very same Modelfile (with the original )
 
 #### Model tuning
 
@@ -122,3 +158,21 @@ Scanning the Internet for useful hints, I've found several projects as hints/sta
 - [this project](https://github.com/PromptEngineer48/Ollama) has the ingestion of local documents and CLI query part
 - [this one](https://github.com/amithkoujalgi/ollama-pdf-bot) focused on PDFs
 - [another](https://github.com/srang992/Ollama-Chatbot/tree/main) chatbot with **Langchain**
+
+Each of these projects, however, assumes that both your source documents and the vector database holding them after needed transformations are **local**.
+While the source document's directory could be a Samba share and/or a synced Sharepoint library, the fact that the vector database isn't reachable from the network limits severely the usefulness of previously mentioned projects.
+
+## Vector databases
+
+### ChromaDB
+
+The vector database used by the first of the inspirationals projects could be used in a client-server fashion, via **Docker Compose**.
+However, [this page](https://docs.trychroma.com/deployment) states that the *server* part of ChromaDB has to be considered still **alpha** quality.
+
+```
+git clone https://github.com/chroma-core/chroma.git
+cd chroma 
+docker compose up -d --build 
+```
+
+
