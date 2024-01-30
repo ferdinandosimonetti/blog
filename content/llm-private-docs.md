@@ -111,7 +111,14 @@ This [website](https://www.sbert.net/docs/pretrained_models.html) has a collecti
 
 A [Repository](https://llamahub.ai/) of *Data Loaders* for specific source documents' types (Word, Excel, PDF, Powerpoint and so on), Connectors (*Agent Tools*) for online services (Google Docs, Slack...) and *Packs* (quite all-in-one, more vertical, solutions)
 
+## Scary article 
+
+It warns about the dangers of relying on DIY (sort of) tooling for LLM interactions.
+Would you like to be scared? [Here]() we are...
+
 ## Existing projects
 
-Scanning the Internet for useful hints, I've found [this project](https://github.com/PromptEngineer48/Ollama.git) that seems to be a good starting point for what I need.
-
+Scanning the Internet for useful hints, I've found several projects as hints/starting points:
+- [this project](https://github.com/PromptEngineer48/Ollama) has the ingestion of local documents and CLI query part
+- [this one](https://github.com/amithkoujalgi/ollama-pdf-bot) focused on PDFs
+- [another](https://github.com/srang992/Ollama-Chatbot/tree/main) chatbot with **Langchain**
