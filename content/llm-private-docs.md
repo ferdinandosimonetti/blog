@@ -166,8 +166,10 @@ While the source document's directory could be a Samba share and/or a synced Sha
 
 ### ChromaDB
 
-The vector database used by the first of the inspirationals projects could be used in a client-server fashion, via **Docker Compose**.
+The vector database used by the first of the inspirationals projects could be run as a server too, via **Docker Compose** or directly with *docker run*.
 However, [this page](https://docs.trychroma.com/deployment) states that the *server* part of ChromaDB has to be considered still **alpha** quality.
+
+- Server start up
 
 ```
 git clone https://github.com/chroma-core/chroma.git
@@ -175,4 +177,35 @@ cd chroma
 docker compose up -d --build 
 ```
 
+- Python access
 
+```
+pip install chromadb
+```
+
+```
+import chromadb
+chroma_client = chromadb.HttpClient(host='localhost', port=8000)
+```
+
+### Qdrant
+
+[Qdrant](https://qdrant.tech/) is another vector database, easy to use with Python (see examples [on their Github](https://github.com/qdrant/qdrant)).
+
+- Server start up
+
+```
+docker run -d --restart=unless-stopped -p 6333:6333 -p 6334:6334 -v qdrant-data:/qdrant/storage -v qdrant-snapshot:/qdrant/snapshot --name qdrant qdrant/qdrant
+```
+
+- Python access
+
+```
+pip install qdrant-client
+```
+
+```
+import qdrant_client
+qdrant = QdrantClient("http://localhost:6333")
+...
+```
