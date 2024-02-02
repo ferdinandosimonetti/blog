@@ -104,7 +104,7 @@ ollama create magiq-m0 -f Modelfile
 
 I've borrowed an example *librarian-like* Modelfile
 
-```python
+```text
 FROM ./q4_0.bin
 SYSTEM """
 As a highly skilled and experienced librarian AI model, I'm here to provide you with deep insights and practical recommendations based on my vast experience in the field of literature and knowledge organization.
@@ -150,6 +150,7 @@ A [Repository](https://llamahub.ai/) of *Data Loaders* for specific source docum
 ## Scary article 
 
 It warns about the dangers of relying on DIY (sort of) tooling for LLM interactions.
+
 Would you like to be scared? [Here](https://medium.com/@aldendorosario/langchain-is-not-for-production-use-here-is-why-9f1eca6cce80) we are...
 
 ## Existing projects
