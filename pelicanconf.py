@@ -24,10 +24,9 @@ LINKS = (('Terraform', 'https://www.terraform.io/'),
          ('vRealize Automation', 'https://docs.vmware.com/en/vRealize-Automation/index.html'),)
 
 # Social widget
-SOCIAL = (('Pixelfed', 'https://pixelfed.uno/@rimmon1971'),
-          ('Peertube', 'https://peertube.uno/@rimmon1971'),
+SOCIAL = (('Fediverse','https://misskey.social/@rimmon1971')
           ('LinkedIN', 'https://www.linkedin.com/in/ferdinandosimonetti'),
-          ('Github', 'https://github.com/ferdinandosimonetti'),)
+          ('Github', 'https://github.com/ferdinandosimonetti'))
 
 DEFAULT_PAGINATION = 10
 
