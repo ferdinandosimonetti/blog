@@ -3,7 +3,7 @@ Author: Ferdinando Simonetti
 Tags: LLM, Ollama, Llamaindex, ChromaDB, Qdrant, Python
 Category: Programming
 Date: 2024-01-30
-Modified: 2024-01-30
+Modified: 2024-02-02
 
 Here I've tried to describe my journey through LLMs for local knowledge base documents lookup.
 
@@ -155,6 +155,7 @@ Would you like to be scared? [Here](https://medium.com/@aldendorosario/langchain
 ## Existing projects
 
 Scanning the Internet for useful hints, I've found several projects as hints/starting points:
+
 - [this project](https://github.com/PromptEngineer48/Ollama) has the ingestion of local documents and CLI query part
 - [this one](https://github.com/amithkoujalgi/ollama-pdf-bot) focused on PDFs
 - [another](https://github.com/srang992/Ollama-Chatbot/tree/main) chatbot with **Langchain**
