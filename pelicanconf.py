@@ -24,7 +24,7 @@ LINKS = (('Terraform', 'https://www.terraform.io/'),
          ('vRealize Automation', 'https://docs.vmware.com/en/vRealize-Automation/index.html'),)
 
 # Social widget
-SOCIAL = (('Fediverse','https://misskey.social/@rimmon1971')
+SOCIAL = (('Fediverse','https://misskey.social/@rimmon1971'),
           ('LinkedIN', 'https://www.linkedin.com/in/ferdinandosimonetti'),
           ('Github', 'https://github.com/ferdinandosimonetti'))
 

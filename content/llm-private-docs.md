@@ -280,7 +280,8 @@ mirostat_tau: 20.0
 
 ### Python simple client
 
-You have only to load Ollama's Python library:
+The work shown below is inspired by [this article](https://developers-blog.org/ollama-python-library-tutorial-with-examples/) about Ollama Python's library. 
+It turns out that said library is the *only* requirement for this kind of interactions.
 
 ```text
 # requirements.txt
