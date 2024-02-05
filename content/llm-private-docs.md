@@ -68,7 +68,7 @@ There is an [in-browser](https://chromewebstore.google.com/detail/ollama-ui/cmgd
 ### Models
 
 On [Huggingface](https://huggingface.co/models) model library I've found [a model](https://huggingface.co/mymaia/Magiq-M0) whose primary purpose is *to enhance interactions in English, French, and Italian, each with unique linguistic peculiarities and nuances*; given that I'm Italian, and my end goal is building tools for:
-- loading (as chunks) all sort of corporate documents (mostly written in Italian for an Italian audience, otherwise in English) on a vector database running on a corporate VMs, taking care of updates as well
+- loading (as chunks) all sort of corporate documents (mostly written in Italian for an Italian audience, otherwise in English) on a vector database running on a corporate VM, taking care of updates as well
 - allowing work colleagues to query the above built *knowledge base* using natural language, via a command line and/or web-based tool
 
 the vast majority of the models in the wild are English-centric, so quite poorly fitted for it.
