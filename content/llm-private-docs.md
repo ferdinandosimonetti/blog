@@ -52,6 +52,7 @@ It presents itself as a **User-Friendly Web Interface for Chat Interactions**, y
 Its *docker-compose.yml* file starts both a container-based Ollama instance and its Web companion that enables the user to download and customize (operating parameters and prompts) new LLM models from Ollama's [model library](https://ollama.ai/library) and/or other sources, as well as loading personal documents to use as **query context** within a query.
 
 There are other *docker-compose.xxx* files, meant for Ollama server behavior's customization:
+
 - **docker-compose.api.yaml**: exposes Ollama API port to the host
 - **docker-compose.gpu.yaml**: enables GPU support
 - **docker-compose.data.yaml**: uses host system's directory to persist Ollama data, instead of relying on Docker volumes
